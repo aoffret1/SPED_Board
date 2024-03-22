@@ -224,7 +224,7 @@ const chuckedData1 = chunkWithId(DATA1, 1, "1234")
 
 //Card Component
 const Card = ({ item, onPress, backgroundColor, textColor}) => {
-  console.log(`CARD COMPONENT: ${item.data[0].id}`);
+  // console.log(`CARD COMPONENT: ${item.data[0].id}`);
   return(
     <TouchableOpacity onPress={onPress} style={[styles.item, backgroundColor]}>
       <Text style={[styles.title, textColor]}>{item.data[0].title}</Text>
@@ -235,10 +235,10 @@ const Card = ({ item, onPress, backgroundColor, textColor}) => {
 
 const App = () => {
   //Handle the selected option.
-  // const [selectedId, setSelectedId] = useState(["hi"]);
   const [selectedData, setSelectedData] = useState([]);
   //Set First/Then row
   const [firstThenRow, setFirstThenRow]= useState(chuckedData1);
+  let switchObjects = firstThenRow;
 
 
   useEffect(() => {
@@ -269,6 +269,11 @@ const App = () => {
       } else if (selectedData.length > 2){
         console.log("ERROR: error in selectedData size: bigger than 2");
       } 
+
+      if(switchObjects.length == 2) {
+        console.log("In SwitchObjects");
+        setFirstThenRow(switchObjects);
+      }
      //ProcessData done in useEffect for selectedData
     } catch (error) {
       console.error('An error occurred in handleItemPress:', error);
@@ -308,7 +313,8 @@ const App = () => {
 
         console.log(`SWAPED:  selected0: ${selected0.id}, selected1: ${selected1.id}`);
 
-        setFirstThenRow([selected0, selected1]);
+        //setFirstThenRow([selected0, selected1]);
+        switchObjects = [selected0, selected1];
         return;
 
       
@@ -340,11 +346,7 @@ const App = () => {
       } //if neither first/then selected
       else if((selected0.id !== "firstID" || selected0.id != "thenID") &&
         (selected1.id != "thenID" || selected1.id != "firstID")) {
-          
           console.log("Neither first of then selection entered");
-
-          //clear selectedData and exit
-          // setSelectedData([]);
           return;
       }
       else {
@@ -376,36 +378,50 @@ const App = () => {
   console.log(`First then row  is in reaload: ${firstThenRow[0]?.data[0]?.id} then: ${firstThenRow[1]?.data[0]?.id}` );
 
   try {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.firstSecond}>
-          <Text style={styles.firstThenText}>First</Text>
-          <Text style={styles.firstThenText}>Then</Text>
-        </View>
-          <Row>
-            <Card
-              item={firstThenRow[0]}
-              onPress={() => {handleItemPress(firstThenRow[0].data[0])}}
-              style={{width: 200}}
-              extraData={firstThenRow[0].data[0]}
+    if((firstThenRow[0].data[0] !== undefined && firstThenRow[0].data[0] !== null)
+        || (firstThenRow[1].data[0] !== undefined && firstThenRow[1].data[0] !== null)) {
+      return (
+        <SafeAreaView style={styles.container}>
+          <View style={styles.firstSecond}>
+            <Text style={styles.firstThenText}>First</Text>
+            <Text style={styles.firstThenText}>Then</Text>
+          </View>
+            <Row>
+              <Card
+                item={firstThenRow[0]}
+                onPress={() => {handleItemPress(firstThenRow[0].data[0])}}
+                style={{width: 200}}
+                extraData={firstThenRow[0].data[0]}
+              />
+              <Card
+                item={firstThenRow[1]}
+                onPress={() => {handleItemPress(firstThenRow[1].data[0])}}
+                style={{width: 200}}
+                extraData={firstThenRow[1].data[0]}
+              />
+            </Row>
+          <View>
+            <FlatList
+                data={chuckedData}
+                renderItem={renderCards}
+                numColumns={numColumns}
+                keyExtractor={(item) => item.data[0].id}
             />
-            <Card
-              item={firstThenRow[1]}
-              onPress={() => {handleItemPress(firstThenRow[1].data[0])}}
-              style={{width: 200}}
-              extraData={firstThenRow[1].data[0]}
-            />
-          </Row>
+          </View>
+        </SafeAreaView>
+      );
+    } else {
+      return(
         <View>
-          <FlatList
-              data={chuckedData}
-              renderItem={renderCards}
-              numColumns={numColumns}
-              keyExtractor={(item) => item.data[0].id}
-          />
+            <FlatList
+                data={chuckedData}
+                renderItem={renderCards}
+                numColumns={numColumns}
+                keyExtractor={(item) => item.data[0].id}
+            />
         </View>
-      </SafeAreaView>
-    );
+      );
+    }
   } catch (error) {
     console.error('An error occurred in handleItemPress:', error);
   }
